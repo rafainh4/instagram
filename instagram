@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Comparador de Seguidores</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #f7f7f7; }
+    textarea { width: 100%; height: 150px; margin-bottom: 10px; }
+    button { padding: 10px 20px; margin-right: 10px; }
+    .result { background: white; padding: 10px; margin-top: 20px; border-radius: 5px; }
+    h2 { margin-top: 30px; }
+    ul { padding-left: 20px; }
+  </style>
+</head>
+<body>
+  <h1>Comparador de Seguidores e Seguidos</h1>
+
+  <h2>Lista Atual de Seguidores</h2>
+  <textarea id="seguidoresAtual" placeholder="Cole aqui sua lista atual de seguidores (@usuário por linha)"></textarea>
+
+  <h2>Lista Atual de Seguidos</h2>
+  <textarea id="seguidosAtual" placeholder="Cole aqui sua lista atual de seguidos (@usuário por linha)"></textarea>
+
+  <button onclick="salvarListas()">Salvar Listas</button>
+  <button onclick="comparar()">Comparar com listas anteriores</button>
+
+  <div class="result" id="resultado"></div>
+
+  <script>
+    function salvarListas() {
+      const seguidores = document.getElementById("seguidoresAtual").value.trim().split("\n").map(s => s.trim());
+      const seguidos = document.getElementById("seguidosAtual").value.trim().split("\n").map(s => s.trim());
+
+      localStorage.setItem("seguidoresAntigos", JSON.stringify(seguidores));
+      localStorage.setItem("seguidosAntigos", JSON.stringify(seguidos));
+
+      document.getElementById("resultado").innerHTML = "<p>Listas salvas! Volte outro dia e cole as novas pra comparar.</p>";
+    }
+
+    function comparar() {
+      const seguidoresNovos = document.getElementById("seguidoresAtual").value.trim().split("\n").map(s => s.trim());
+      const seguidosNovos = document.getElementById("seguidosAtual").value.trim().split("\n").map(s => s.trim());
+
+      const seguidoresAntigos = JSON.parse(localStorage.getItem("seguidoresAntigos") || "[]");
+      const seguidosAntigos = JSON.parse(localStorage.getItem("seguidosAntigos") || "[]");
+
+      const ganhouSeguidor = seguidoresNovos.filter(x => !seguidoresAntigos.includes(x));
+      const perdeuSeguidor = seguidoresAntigos.filter(x => !seguidoresNovos.includes(x));
+      const seguiuAlguem = seguidosNovos.filter(x => !seguidosAntigos.includes(x));
+      const deixouDeSeguir = seguidosAntigos.filter(x => !seguidosNovos.includes(x));
+
+      let html = "";
+
+      html += `<h2>+ Novos seguidores (${ganhouSeguidor.length})</h2><ul>${ganhouSeguidor.map(n => `<li>${n}</li>`).join("")}</ul>`;
+      html += `<h2>- Deixaram de te seguir (${perdeuSeguidor.length})</h2><ul>${perdeuSeguidor.map(n => `<li>${n}</li>`).join("")}</ul>`;
+      html += `<h2>+ Você seguiu (${seguiuAlguem.length})</h2><ul>${seguiuAlguem.map(n => `<li>${n}</li>`).join("")}</ul>`;
+      html += `<h2>- Você deixou de seguir (${deixouDeSeguir.length})</h2><ul>${deixouDeSeguir.map(n => `<li>${n}</li>`).join("")}</ul>`;
+
+      document.getElementById("resultado").innerHTML = html;
+    }
+  </script>
+</body>
+</html>
